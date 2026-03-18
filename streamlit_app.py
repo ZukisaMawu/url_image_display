@@ -465,20 +465,11 @@ else:
     # Welcome screen
     st.markdown("""
     <div style='text-align: center; padding: 3rem;'>
-        <h2>👋 Welcome to URL Image Viewer</h2>
+        <h2> URL Image Viewer</h2>
         <p style='font-size: 1.2rem; color: #666;'>
-            Upload an Excel file with product URLs to get started
+            Upload an Excel file 
         </p>
         <br>
-        <h3>📋 Features:</h3>
-        <ul style='list-style: none; padding: 0;'>
-            <li>✅ Automatic slideshow mode</li>
-            <li>✅ Manual navigation controls</li>
-            <li>✅ Product information display</li>
-            <li>✅ Image download capability</li>
-            <li>✅ Progress tracking</li>
-            <li>✅ Viewing history</li>
-        </ul>
     </div>
     """, unsafe_allow_html=True)
     
