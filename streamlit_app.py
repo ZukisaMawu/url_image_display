@@ -122,7 +122,14 @@ def get_product_info(row, url_column):
             break
     
     # Get description
-    desc_columns = ['description', 'Description', 'desc', 'Desc']
+    desc_columns = [
+        'description', 'Description', 'DESCRIPTION',
+        'desc', 'Desc', 'DESC',
+        'product_description', 'Product Description', 'Product_Description',
+        'details', 'Details', 'DETAILS',
+        'info', 'Info', 'INFO',
+        'about', 'About', 'ABOUT'
+    ]
     for col in desc_columns:
         if col in row.index and pd.notna(row[col]):
             info['description'] = str(row[col])
@@ -160,7 +167,7 @@ st.markdown("### Automatically display product images from Excel URLs")
 
 # Sidebar
 with st.sidebar:
-    st.header("Settings")
+    st.header("⚙️ Settings")
     
     # File uploader
     uploaded_file = st.file_uploader(
@@ -177,10 +184,10 @@ with st.sidebar:
             else:
                 df = pd.read_excel(uploaded_file)
             
-            st.success(f"Loaded {len(df)} rows")
+            st.success(f"✅ Loaded {len(df)} rows")
             
             # Column selection
-            st.subheader("Column Settings")
+            st.subheader("📋 Column Settings")
             url_column = st.selectbox(
                 "URL Column",
                 df.columns,
@@ -193,13 +200,13 @@ with st.sidebar:
             df_filtered = df_filtered[df_filtered[url_column].astype(str).str.strip() != '']
             
             if len(df_filtered) < len(df):
-                st.warning(f"Filtered out {len(df) - len(df_filtered)} rows with empty URLs")
+                st.warning(f"⚠️ Filtered out {len(df) - len(df_filtered)} rows with empty URLs")
             
             st.session_state.df = df_filtered
             st.session_state.url_column = url_column
             
             # Display settings
-            st.subheader("Display Settings")
+            st.subheader("⏱️ Display Settings")
             display_seconds = st.slider(
                 "Display Time (seconds)",
                 min_value=3,
@@ -216,7 +223,7 @@ with st.sidebar:
             )
             
             # Range selection
-            st.subheader("Range Selection")
+            st.subheader("🎯 Range Selection")
             total_items = len(df_filtered)
             
             col1, col2 = st.columns(2)
@@ -241,25 +248,25 @@ with st.sidebar:
             # Apply range
             st.session_state.df = df_filtered.iloc[start_index:end_index].reset_index(drop=True)
             
-            st.info(f"Viewing {len(st.session_state.df)} items")
+            st.info(f"📊 Viewing {len(st.session_state.df)} items")
             
             # Preview data
-            with st.expander("Preview Data"):
+            with st.expander("👁️ Preview Data"):
                 st.dataframe(st.session_state.df.head(), use_container_width=True)
         
         except Exception as e:
-            st.error(f"Error loading file: {str(e)}")
+            st.error(f"❌ Error loading file: {str(e)}")
             st.session_state.df = None
     
     # Navigation info
     if st.session_state.df is not None:
         st.markdown("---")
-        st.subheader("Navigation")
+        st.subheader("📍 Navigation")
         st.info(f"Current: {st.session_state.current_index + 1} / {len(st.session_state.df)}")
         
         # History
         if st.session_state.viewing_history:
-            with st.expander("Viewing History"):
+            with st.expander("📜 Viewing History"):
                 for item in st.session_state.viewing_history[-10:]:
                     st.caption(f"Row {item['index'] + 1}: {item['timestamp']}")
 
@@ -315,7 +322,7 @@ if st.session_state.df is not None and len(st.session_state.df) > 0:
     col_left, col_right = st.columns([2, 1])
     
     with col_left:
-        st.markdown("### Product Image")
+        st.markdown("### 🖼️ Product Image")
         
         # Image container
         image_placeholder = st.empty()
@@ -332,6 +339,25 @@ if st.session_state.df is not None and len(st.session_state.df) > 0:
                     caption=product_info.get('name', 'Product Image')
                 )
                 
+                # Display description below image if available
+                if 'description' in product_info:
+                    st.markdown(f"""
+                    <div style='background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
+                                padding: 1.5rem; 
+                                border-radius: 10px; 
+                                margin-top: 1rem;
+                                box-shadow: 0 4px 6px rgba(0,0,0,0.1);'>
+                        <p style='color: white; 
+                                  margin: 0; 
+                                  font-size: 1rem; 
+                                  line-height: 1.6;
+                                  font-weight: 500;'>
+                            <strong style='font-size: 1.1rem;'>📝 Description:</strong><br><br>
+                            {product_info['description']}
+                        </p>
+                    </div>
+                    """, unsafe_allow_html=True)
+                
                 # Log to history
                 if not st.session_state.viewing_history or \
                    st.session_state.viewing_history[-1]['index'] != st.session_state.current_index:
@@ -341,17 +367,28 @@ if st.session_state.df is not None and len(st.session_state.df) > 0:
                         'url': product_info['url']
                     })
             else:
-                image_placeholder.error(f"Failed to load image: {error}")
+                image_placeholder.error(f"❌ Failed to load image: {error}")
                 st.code(product_info['url'], language=None)
     
     with col_right:
-        st.markdown("### Product Details")
+        st.markdown("### 📋 Product Details")
         
         # Product information card
         info_html = '<div class="product-info">'
         
         if 'name' in product_info:
             info_html += f"<h4>📦 {product_info['name']}</h4>"
+        
+        # Description - Make it prominent
+        if 'description' in product_info:
+            info_html += f"""
+            <div style='background: #f0f2f6; padding: 1rem; border-radius: 8px; margin: 1rem 0; border-left: 4px solid #667eea;'>
+                <p style='margin: 0; font-size: 0.95rem; line-height: 1.6; color: #262730;'>
+                    <strong style='color: #667eea;'>📝 Description:</strong><br>
+                    {product_info['description']}
+                </p>
+            </div>
+            """
         
         if 'sku' in product_info:
             info_html += f"<p><strong>SKU:</strong> {product_info['sku']}</p>"
@@ -362,16 +399,13 @@ if st.session_state.df is not None and len(st.session_state.df) > 0:
         if 'category' in product_info:
             info_html += f"<p><strong>📁 Category:</strong> {product_info['category']}</p>"
         
-        if 'description' in product_info:
-            info_html += f"<p><strong>📝 Description:</strong> {product_info['description']}</p>"
-        
         info_html += f'<p><strong>🔗 URL:</strong> <a href="{product_info["url"]}" target="_blank">Open in new tab</a></p>'
         info_html += '</div>'
         
         st.markdown(info_html, unsafe_allow_html=True)
         
         # Jump to specific row
-        st.markdown("### Jump to Row")
+        st.markdown("### 🎯 Jump to Row")
         jump_to = st.number_input(
             "Row number",
             min_value=1,
@@ -385,7 +419,7 @@ if st.session_state.df is not None and len(st.session_state.df) > 0:
             st.rerun()
         
         # Download options
-        #st.markdown("### 💾 Export")
+        st.markdown("### 💾 Export")
         
         if img:
             # Convert PIL image to bytes
@@ -419,10 +453,10 @@ if st.session_state.df is not None and len(st.session_state.df) > 0:
         st.rerun()
     
     elif auto_advance and st.session_state.current_index >= len(st.session_state.df) - 1:
-        st.success("Reached the end of the slideshow!")
+        st.success("✅ Reached the end of the slideshow!")
         st.session_state.auto_advance = False
         
-        if st.button("Start Over"):
+        if st.button("🔄 Start Over"):
             st.session_state.current_index = 0
             st.session_state.auto_advance = True
             st.rerun()
@@ -431,31 +465,41 @@ else:
     # Welcome screen
     st.markdown("""
     <div style='text-align: center; padding: 3rem;'>
-        <h2>URL Image Viewer</h2>
+        <h2>👋 Welcome to URL Image Viewer</h2>
         <p style='font-size: 1.2rem; color: #666;'>
-            Upload an Excel file
+            Upload an Excel file with product URLs to get started
         </p>
+        <br>
+        <h3>📋 Features:</h3>
+        <ul style='list-style: none; padding: 0;'>
+            <li>✅ Automatic slideshow mode</li>
+            <li>✅ Manual navigation controls</li>
+            <li>✅ Product information display</li>
+            <li>✅ Image download capability</li>
+            <li>✅ Progress tracking</li>
+            <li>✅ Viewing history</li>
+        </ul>
     </div>
     """, unsafe_allow_html=True)
     
     # Example data format
-    #with st.expander("📖 Example Excel Format"):
-        #example_data = {
-            #'url_1': [
-             #   'https://example.com/image1.jpg',
-             #   'https://example.com/image2.png',
-             #   'https://example.com/image3.jpg'
-           # ],
-           # 'product_name': ['Product A', 'Product B', 'Product C'],
-           # 'price': ['$19.99', '$29.99', '$39.99'],
-           # 'category': ['Electronics', 'Clothing', 'Home']
-       # }
-       # st.dataframe(pd.DataFrame(example_data), use_container_width=True)
+    with st.expander("📖 Example Excel Format"):
+        example_data = {
+            'url_1': [
+                'https://example.com/image1.jpg',
+                'https://example.com/image2.png',
+                'https://example.com/image3.jpg'
+            ],
+            'product_name': ['Product A', 'Product B', 'Product C'],
+            'price': ['$19.99', '$29.99', '$39.99'],
+            'category': ['Electronics', 'Clothing', 'Home']
+        }
+        st.dataframe(pd.DataFrame(example_data), use_container_width=True)
 
 # Footer
 st.markdown("---")
 st.markdown("""
 <div style='text-align: center; color: #666; padding: 1rem;'>
-    URL Image Viewer | Built with Streamlit
+    🖼️ URL Image Viewer | Built with Streamlit
 </div>
 """, unsafe_allow_html=True)
