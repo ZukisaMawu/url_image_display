@@ -470,7 +470,7 @@ else:
             Upload an Excel file
         </p>
     </div>
-    """
+    """)
     #     <br>
     #     <h3>📋 Features:</h3>
     #     <ul style='list-style: none; padding: 0;'>
