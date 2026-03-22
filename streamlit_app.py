@@ -125,7 +125,8 @@ def get_product_info(row, url_column):
     desc_columns = [
         'description', 'Description', 'DESCRIPTION',
         'desc', 'Desc', 'DESC',
-        'product_description', 'Product Description', 'Product_Description',
+        'product_description', 'Product Description', 'Product_Description', 
+        'Full Description',
         'details', 'Details', 'DETAILS',
         'info', 'Info', 'INFO',
         'about', 'About', 'ABOUT'
